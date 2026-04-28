@@ -1,0 +1,15 @@
+name: team-task-tracker-sre
+metadata:
+  template: team-task-tracker-sre@0.0.1-beta
+infra:
+  provider: bicep
+  path: ./infra
+  module: main
+pipeline:
+  provider: github
+hooks:
+  postprovision:
+    shell: sh
+    run: bash scripts/post-provision.sh
+    interactive: true
+    continueOnError: false

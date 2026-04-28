@@ -1,0 +1,38 @@
+api_version: azuresre.ai/v1
+kind: ScheduledTask
+spec:
+  name: task-tracker-config-drift
+  description: Configuration drift detection for the Team Task Tracker application every 6 hours
+  cronExpression: "0 */6 * * *"
+  agent: ""
+  agentPrompt: |
+    Perform comprehensive configuration drift detection for the Team Task Tracker application:
+
+    1. Check environment variables:
+       - Verify all required environment variables are set
+       - Compare current values against expected values from deployment config
+       - Alert if any expected variables are missing or have incorrect values
+
+    2. Verify container resource limits:
+       - Check CPU limits (should match deployment specification)
+       - Check memory limits (should match deployment specification)
+       - Check if current resource requests align with expected values
+       - Alert if limits differ from expected configuration
+
+    3. Compare running image versions:
+       - Get current container image SHA and version tag
+       - Compare against the expected image version from deployment manifests
+       - Alert if running image doesn't match expected version
+       - Check for unintended image rollbacks or misdeployments
+
+    4. Check scaling configuration:
+       - Verify min/max replica counts
+       - Verify scale-out/scale-in rules if applicable
+       - Compare against deployment specifications
+
+    5. If ANY drift is detected:
+       - Use the incident-handler subagent to create a GitHub issue
+       - Title: "⚠️ Configuration Drift Detected in Task Tracker"
+       - Include detailed list of all detected drifts
+       - Recommend remediation actions (redeploy, manual adjustment)
+       - Tag with 'sre', 'config-drift', 'needs-investigation' labels

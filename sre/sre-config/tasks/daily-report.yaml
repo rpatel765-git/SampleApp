@@ -1,0 +1,50 @@
+api_version: azuresre.ai/v1
+kind: ScheduledTask
+spec:
+  name: task-tracker-daily-report
+  description: Daily reliability report for the Team Task Tracker application at 8am UTC
+  cronExpression: "0 8 * * *"
+  agent: ""
+  agentPrompt: |
+    Generate comprehensive daily reliability report for the Team Task Tracker application:
+
+    1. Gather 24-hour metrics summary:
+       - Total request count
+       - Error rate (5xx, 4xx breakdown)
+       - Request success rate (target: >99%)
+       - p50, p95, p99 latency metrics
+       - Average response time
+       - Peak concurrent requests
+
+    2. Identify degradation trends:
+       - Compare last 24h metrics to 7-day average
+       - Flag any significant increases in error rate (>10% increase)
+       - Flag any latency regressions (p95 increase >20%)
+       - Detect any unexplained service interruptions or anomalies
+
+    3. Correlate with deployment activity:
+       - Check recent PRs merged in last 24h
+       - Check deployments that went out in last 24h
+       - Identify if any metrics degradation correlates with recent changes
+       - Use the code-analyzer subagent to review changes in deployed PRs
+
+    4. Identify infrastructure issues:
+       - Memory pressure or OOM events
+       - CPU throttling events
+       - Disk space utilization
+       - Database connection pool exhaustion
+       - Cache hit rates and evictions
+
+    5. Generate reliability recommendations:
+       - Highlight any areas needing optimization
+       - Suggest performance improvements
+       - Recommend alerting threshold adjustments if needed
+       - Identify potential capacity planning needs
+
+    6. Post summary to GitHub:
+       - Use the incident-handler subagent to create a GitHub discussion/issue
+       - Title: "📊 Daily Reliability Report - [YYYY-MM-DD]"
+       - Include formatted metrics summary table
+       - Include trend analysis and anomalies
+       - Include 3-5 actionable recommendations
+       - Tag with 'sre', 'daily-report', 'reliability' labels
