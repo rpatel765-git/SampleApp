@@ -22,6 +22,7 @@ safe-outputs:
     max: 1
     draft: true
     title-prefix: "[chaos] "
+    protected-files: fallback-to-issue
     labels: ["chaos-engineering", "do-not-merge-without-review"]
   create-issue:
     max: 1
