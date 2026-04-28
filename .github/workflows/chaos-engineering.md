@@ -10,28 +10,24 @@ on:
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
 
 engine: copilot
 
 network:
   allowed:
-    - "github.com"
-    - "*.githubusercontent.com"
+    - "github"
 
 safe-outputs:
   create-pull-request:
     max: 1
     draft: true
     title-prefix: "[chaos] "
-    branch-prefix: "chaos/"
     labels: ["chaos-engineering", "do-not-merge-without-review"]
   create-issue:
     max: 1
     labels: ["chaos-engineering"]
 
-timeout_minutes: 15
+timeout-minutes: 15
 ---
 
 # Chaos Engineering Agent
