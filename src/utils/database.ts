@@ -11,7 +11,7 @@ let teamsContainer: Container;
  */
 export async function initDatabase(): Promise<void> {
   const endpoint = process.env.COSMOS_ENDPOINT;
-  const key = process.env.COSMOS_KEY;
+  const key = process.env.COSMOS_API_KEY;
   const databaseId = process.env.COSMOS_DATABASE ?? 'teamtasktracker';
 
   if (!endpoint || !key) {
@@ -65,5 +65,5 @@ export function getInMemoryTeams(): Map<string, Record<string, unknown>> {
  * Returns true when a real Cosmos DB connection is available.
  */
 export function isCosmosConfigured(): boolean {
-  return Boolean(process.env.COSMOS_ENDPOINT && process.env.COSMOS_KEY);
+  return Boolean(process.env.COSMOS_ENDPOINT && process.env.COSMOS_API_KEY);
 }
