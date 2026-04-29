@@ -160,7 +160,7 @@ router.post('/', validateBody(CreateTaskSchema), async (req: Request, res: Respo
     }
 
     logger.info({ taskId: task.id, teamId: task.teamId }, 'Task created');
-    res.status(201).json(success(task));
+    res.status(200).json(success(task));
   } catch (err) {
     logger.error({ err }, 'Failed to create task');
     res.status(500).json(error('Unable to create task. Please try again later.', 'TASK_CREATE_FAILED'));
