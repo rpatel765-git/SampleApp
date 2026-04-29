@@ -16,9 +16,12 @@ permissions:
   contents: read
   checks: write
   pull-requests: write
+  id-token: write   # required for Azure OIDC login
 
 env:
   NODE_VERSION: '20'
+  AZURE_APP_NAME: team-task-tracker-04291535
+  AZURE_RESOURCE_GROUP: team-task-tracker-rg
 
 jobs:
   # ---------- Build & Lint ----------
@@ -114,7 +117,7 @@ jobs:
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
     environment:
       name: staging
-      url: https://team-task-tracker-staging.azurewebsites.net
+      url: https://team-task-tracker-04291535-staging.azurewebsites.net
 
     steps:
       - uses: actions/checkout@v4
@@ -128,15 +131,17 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Login to Azure
+      - name: Login to Azure (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: e6d66770-72ff-4b02-86d5-3e896c044ffa
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: 9fba83b6-68ea-48e7-b7fa-60421d076a6d
 
       - name: Deploy to Azure App Service (Staging)
         uses: azure/webapps-deploy@v3
         with:
-          app-name: team-task-tracker
+          app-name: ${{ env.AZURE_APP_NAME }}
           slot-name: staging
           package: .
 
@@ -150,20 +155,20 @@ jobs:
       - name: Health Check
         run: |
           for i in {1..10}; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://team-task-tracker-staging.azurewebsites.net/health)
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ env.AZURE_APP_NAME }}-staging.azurewebsites.net/health)
             if [ "$STATUS" = "200" ]; then
-              echo "✅ Health check passed"
+              echo "Health check passed"
               exit 0
             fi
             echo "Attempt $i: status $STATUS — retrying in 10s..."
             sleep 10
           done
-          echo "❌ Health check failed after 10 attempts"
+          echo "Health check failed after 10 attempts"
           exit 1
 
       - name: API Status Check
         run: |
-          curl -sf https://team-task-tracker-staging.azurewebsites.net/api/v1/status | jq .
+          curl -sf https://${{ env.AZURE_APP_NAME }}-staging.azurewebsites.net/api/v1/status | jq .
 
   # ---------- Deploy to Production ----------
   deploy-production:
@@ -172,20 +177,22 @@ jobs:
     needs: smoke-test
     environment:
       name: production
-      url: https://team-task-tracker.azurewebsites.net
+      url: https://team-task-tracker-04291535.azurewebsites.net
 
     steps:
-      - name: Login to Azure
+      - name: Login to Azure (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          client-id: e6d66770-72ff-4b02-86d5-3e896c044ffa
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: 9fba83b6-68ea-48e7-b7fa-60421d076a6d
 
       - name: Swap Staging → Production
         uses: azure/cli@v2
         with:
           inlineScript: |
             az webapp deployment slot swap \
-              --resource-group team-task-tracker-rg \
-              --name team-task-tracker \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --name ${{ env.AZURE_APP_NAME }} \
               --slot staging \
               --target-slot production
