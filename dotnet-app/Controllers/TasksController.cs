@@ -71,7 +71,8 @@ public class TasksController : ControllerBase
     [ProduceResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TaskItem>> CreateTask(TaskItem task)
     {
-        _logger.LogInformation("Creating new task: {Title}", task.Title);
+        var safeTitleForLog = task.Title?.Replace("\r", "").Replace("\n", "");
+        _logger.LogInformation("Creating new task: {Title}", safeTitleForLog);
 
         if (string.IsNullOrWhiteSpace(task.Title))
         {
