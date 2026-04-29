@@ -68,23 +68,23 @@ jobs:
           path: coverage/
 
   # ---------- Security Scanning ----------
-  codeql:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      security-events: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+  # NOTE: CodeQL is handled by GitHub Code Scanning "Default Setup".
+  # To run CodeQL here instead, disable Default Setup in:
+  #   Settings → Code security → Code scanning → switch to Advanced
+  # Then uncomment the job below.
+  #
+  # codeql:
+  #   name: CodeQL Analysis
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   permissions:
+  #     security-events: write
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: github/codeql-action/init@v3
+  #       with:
+  #         languages: javascript-typescript
+  #     - uses: github/codeql-action/analyze@v3
 
   dependency-review:
     name: Dependency Review
@@ -104,7 +104,7 @@ jobs:
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    needs: [test, codeql]
+    needs: test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment:
       name: staging
