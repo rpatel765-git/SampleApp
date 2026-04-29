@@ -46,7 +46,7 @@ export function paginated<T>(
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.floor(total / limit),
     },
   };
 }
