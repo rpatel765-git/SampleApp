@@ -19,7 +19,11 @@ export async function initDatabase(): Promise<void> {
     return;
   }
 
-  client = new CosmosClient({ endpoint, key });
+  client = new CosmosClient({
+    endpoint,
+    key,
+    connectionPolicy: { requestTimeout: Number.MAX_SAFE_INTEGER },
+  });
 
   const { database: db } = await client.databases.createIfNotExists({ id: databaseId });
   database = db;
