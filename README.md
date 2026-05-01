@@ -110,3 +110,37 @@ curl http://localhost:3000/api/v1/dashboard?teamId=<TEAM_ID> \
 - **Authentication:** Microsoft Entra ID (Azure AD)
 - **Hosting:** Azure App Service
 - **CI/CD:** GitHub Actions
+
+## Agentic DevOps Demo
+
+This repo doubles as a live demo of **Agentic DevOps** — eight Copilot-powered
+agents that automate the Ops side of the SDLC. They live as Markdown prompt
+files in `.github/workflows/` and compile to deterministic GitHub Actions
+workflows via `gh aw compile`.
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| `continuous-triage` | issue opened | auto-label / prioritize / route |
+| `continuous-docs` | push to `src/routes/**` | refresh `docs/API.md` via PR |
+| `continuous-testing` | weekly + manual | tests for the worst-covered file |
+| `incident-response` | CI/CD failure on `main` | RCA + fix-PR or tracking issue |
+| `dependency-update` | weekly | safe dep upgrades with proof |
+| `security-audit` | weekly | OWASP-style review → remediation issues |
+| `release-notes` | release published | rewrite auto-generated notes |
+| `flaky-test-detector` | nightly | quarantine flaky tests |
+| `chaos-engineering` | manual | inject one of 13 realistic defects |
+
+**Start here:**
+
+- 📚 Catalog: [`.github/workflows/AGENTIC-WORKFLOWS.md`](.github/workflows/AGENTIC-WORKFLOWS.md)
+- 🎬 Live runbook: [`demos/agentic-devops/README.md`](demos/agentic-devops/README.md)
+- 📝 Copy-paste prompts: [`demos/agentic-devops/demo-prompts.md`](demos/agentic-devops/demo-prompts.md)
+- 🗒 1-pager: [`demos/agentic-devops/cheat-sheet.md`](demos/agentic-devops/cheat-sheet.md)
+
+```powershell
+# Seed reproducible demo artifacts
+pwsh demos/agentic-devops/scripts/seed-demo-data.ps1
+
+# Trigger any workflow by short name
+pwsh demos/agentic-devops/scripts/trigger-workflow.ps1 triage
+```
