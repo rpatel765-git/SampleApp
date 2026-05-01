@@ -191,7 +191,6 @@ router.patch('/:id', validateBody(UpdateTaskSchema), async (req: Request, res: R
       getInMemoryTasks().set(updated.id, updated as unknown as Record<string, unknown>);
     }
 
-    logger.info({ taskId: updated.id }, 'Task updated');
     res.json(success(updated));
   } catch (err) {
     logger.error({ err, taskId: req.params.id }, 'Failed to update task');
