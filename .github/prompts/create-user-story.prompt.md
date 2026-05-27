@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: create-user-story
 description: "Create a comprehensive Azure DevOps User Story with acceptance criteria, security, accessibility, and compliance requirements"
 tools: ["azure-devops"]
 ---

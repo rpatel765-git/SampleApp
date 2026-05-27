@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: code-review
 description: "Perform a structured code review following team standards and best practices"
 tools: ["githubRepo"]
 ---
