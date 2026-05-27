@@ -4,11 +4,13 @@ SQLAlchemy ORM models for the application.
 This module defines the data models using SQLAlchemy 2.0 style with mapped_column.
 """
 
+"""SQLAlchemy ORM models for the application."""
+
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, DateTime, Enum
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import mapped_column
 import enum
+
+from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
@@ -38,12 +40,12 @@ class TaskItem(Base):
     """
     __tablename__ = "tasks"
 
-    id: int = mapped_column(Integer, primary_key=True, index=True)
-    title: str = mapped_column(String(255), nullable=False, index=True)
-    description: str = mapped_column(Text, nullable=True)
-    priority: str = mapped_column(String(20), default=TaskPriority.MEDIUM.value)
-    status: str = mapped_column(String(20), default=TaskStatus.PENDING.value)
-    created_at: datetime = mapped_column(DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    priority: Mapped[str] = mapped_column(String(20), default=TaskPriority.MEDIUM.value)
+    status: Mapped[str] = mapped_column(String(20), default=TaskStatus.PENDING.value)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     def __repr__(self) -> str:
         """String representation of TaskItem."""

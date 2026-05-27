@@ -5,8 +5,8 @@ This module initializes the FastAPI app and defines routes for health checks
 and task management CRUD operations.
 """
 
-from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -24,6 +24,25 @@ app = FastAPI(
 )
 
 
+@app.get("/", response_class=HTMLResponse)
+def home() -> str:
+    """Serve a minimal landing page for browsers."""
+    return """
+    <html>
+      <head><title>Python FastAPI Demo App</title></head>
+      <body>
+        <h1>Python FastAPI Demo App</h1>
+        <p>API is running.</p>
+        <ul>
+          <li><a href="/health">Health</a></li>
+          <li><a href="/docs">API Docs</a></li>
+          <li><a href="/tasks">Tasks</a></li>
+        </ul>
+      </body>
+    </html>
+    """
+
+
 @app.get("/health", status_code=status.HTTP_200_OK)
 def health_check() -> dict[str, str]:
     """
@@ -36,7 +55,11 @@ def health_check() -> dict[str, str]:
 
 
 @app.get("/tasks", response_model=TaskList)
-def list_tasks(skip: int = 0, limit: int = 10, db: Session = None) -> TaskList:
+def list_tasks(
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+) -> TaskList:
     """
     List all tasks with pagination.
 
@@ -48,9 +71,6 @@ def list_tasks(skip: int = 0, limit: int = 10, db: Session = None) -> TaskList:
     Returns:
         TaskList: Paginated list of tasks.
     """
-    if db is None:
-        db = next(get_db())
-    
     try:
         tasks = db.query(TaskItem).offset(skip).limit(limit).all()
         total = db.query(TaskItem).count()
@@ -63,7 +83,7 @@ def list_tasks(skip: int = 0, limit: int = 10, db: Session = None) -> TaskList:
 
 
 @app.get("/tasks/{task_id}", response_model=TaskResponse)
-def get_task(task_id: int, db: Session = None) -> TaskResponse:
+def get_task(task_id: int, db: Session = Depends(get_db)) -> TaskResponse:
     """
     Retrieve a specific task by ID.
 
@@ -77,9 +97,6 @@ def get_task(task_id: int, db: Session = None) -> TaskResponse:
     Raises:
         HTTPException: If the task is not found.
     """
-    if db is None:
-        db = next(get_db())
-    
     task = db.query(TaskItem).filter(TaskItem.id == task_id).first()
     if not task:
         raise HTTPException(
@@ -90,7 +107,7 @@ def get_task(task_id: int, db: Session = None) -> TaskResponse:
 
 
 @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
-def create_task(task: TaskCreate, db: Session = None) -> TaskResponse:
+def create_task(task: TaskCreate, db: Session = Depends(get_db)) -> TaskResponse:
     """
     Create a new task.
 
@@ -104,9 +121,6 @@ def create_task(task: TaskCreate, db: Session = None) -> TaskResponse:
     Raises:
         HTTPException: If task creation fails.
     """
-    if db is None:
-        db = next(get_db())
-    
     try:
         db_task = TaskItem(**task.model_dump())
         db.add(db_task)
@@ -122,7 +136,11 @@ def create_task(task: TaskCreate, db: Session = None) -> TaskResponse:
 
 
 @app.put("/tasks/{task_id}", response_model=TaskResponse)
-def update_task(task_id: int, task_update: TaskUpdate, db: Session = None) -> TaskResponse:
+def update_task(
+    task_id: int,
+    task_update: TaskUpdate,
+    db: Session = Depends(get_db),
+) -> TaskResponse:
     """
     Update an existing task.
 
@@ -137,9 +155,6 @@ def update_task(task_id: int, task_update: TaskUpdate, db: Session = None) -> Ta
     Raises:
         HTTPException: If the task is not found or update fails.
     """
-    if db is None:
-        db = next(get_db())
-    
     db_task = db.query(TaskItem).filter(TaskItem.id == task_id).first()
     if not db_task:
         raise HTTPException(
@@ -163,7 +178,7 @@ def update_task(task_id: int, task_update: TaskUpdate, db: Session = None) -> Ta
 
 
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_task(task_id: int, db: Session = None) -> None:
+def delete_task(task_id: int, db: Session = Depends(get_db)) -> None:
     """
     Delete a task by ID.
 
@@ -174,9 +189,6 @@ def delete_task(task_id: int, db: Session = None) -> None:
     Raises:
         HTTPException: If the task is not found or deletion fails.
     """
-    if db is None:
-        db = next(get_db())
-    
     db_task = db.query(TaskItem).filter(TaskItem.id == task_id).first()
     if not db_task:
         raise HTTPException(
@@ -196,7 +208,7 @@ def delete_task(task_id: int, db: Session = None) -> None:
 
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc: Exception):  # type: ignore
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """
     Global exception handler for uncaught exceptions.
 
